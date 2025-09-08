@@ -2,7 +2,7 @@
 
 julia_version = "1.11.6"
 manifest_format = "2.0"
-project_hash = "cc7e92097ea945b4db37147c42404c671096d8ac"
+project_hash = "b4a9f12c0b491883622a231313d7081c7bb864bc"
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra", "Requires"]
@@ -389,6 +389,12 @@ weakdeps = ["ForwardDiff", "Unitful"]
 git-tree-sha1 = "e2222959fbc6c19554dc15174c81bf7bf3aa691c"
 uuid = "92d709cd-6900-40b7-9082-c6be49f344b6"
 version = "0.2.4"
+
+[[deps.IterativeSolvers]]
+deps = ["LinearAlgebra", "Printf", "Random", "RecipesBase", "SparseArrays"]
+git-tree-sha1 = "59545b0a2b27208b0650df0a46b8e3019f85055b"
+uuid = "42fd0dbc-a981-5370-80f2-aaf504508153"
+version = "0.9.4"
 
 [[deps.JLFzf]]
 deps = ["REPL", "Random", "fzf_jll"]
