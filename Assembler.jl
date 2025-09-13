@@ -144,7 +144,15 @@ function calculate_bilinear_map_rhs(rhs::AbstractVector,a::AbstractVector,b::Abs
     for cell in CellIterator(dh)
         dofs = celldofs(cell)
         reinit!(cellvalues,cell)
-        assemble! (rhs, dofs)
+
+        for q in 1:qpoints 
+            for i in 1:n_basefuncs
+                for i in 1:n_basefuncs
+                    re[] = ae[i]*be[j]*(∇ϕᵢ⋅∇ϕⱼ)* dΩ
+                end
+            end
+        end
+        assemble! (rhs, dofs, re)
     end
 
 
