@@ -1,3 +1,6 @@
+using Pkg
+Pkg.activate("EnvFerrite")
+
 using Ferrite
 using SparseArrays
 using LinearAlgebra
@@ -61,7 +64,6 @@ function assemble_function_vector(cellvalues::CellValues, dh::DofHandler, f, M)
         fill!(Fe, 0.0)
         reinit!(cellvalues, cell)
         coords = getcoordinates(cell)
-        println(coords)
         cdofs = celldofs(cell)
         for q in 1:getnquadpoints(cellvalues)
             x_q = spatial_coordinate(cellvalues, q, coords)
@@ -71,11 +73,7 @@ function assemble_function_vector(cellvalues::CellValues, dh::DofHandler, f, M)
             for i in 1:n_basefuncs
                 Fe[i] += f_val * shape_value(cellvalues, q, i) * dΩ
             end
-        end
-
-        
-        # Assemble local vector into global vector
-  
+        end  
         assemble!(F, cdofs,Fe)
     end
     return M \ F
