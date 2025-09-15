@@ -121,7 +121,8 @@ function assemble_K!(K::SparseMatrixCSC ,cellvalues::CellValues, dh::DofHandler,
         for q_point in 1:getnquadpoints(cellvalues)
             dΩ = getdetJdV(cellvalues, q_point)
             # How do I get the index of the vector γ?
-            σ = γ[cellid(cell)]
+            γe = γ[celldofs(cell)] # (Edit) Could be done more efficiently by copying into preallocated array
+            σ = function_value(cellvalues, q_point, γe)
             for i in 1:n_basefuncs
                 ∇v = shape_gradient(cellvalues, q_point, i)
                 #u = shape_value(cellvalues, q_point, i)
