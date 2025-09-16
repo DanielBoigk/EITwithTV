@@ -138,7 +138,7 @@ function calculate_bilinear_map(a::AbstractVector, b::AbstractVector, cellvalues
         assemble!(rhs, dofs, re)
     end
     
-    return M_cholesky \ rhs
+    return M \ rhs
 end
 
 r_test = calculate_bilinear_map(p_vec,q_vec, cellvalues,dh,MC)
