@@ -1,6 +1,9 @@
 using Pkg
 Pkg.activate("EnvFerrite")
 
+# This is supposed to be a test for the assembler of ∇a ⋅ ∇b 
+
+
 using TypedPolynomials
 @polyvar x y
 p = 2x*y^2 +y -2x
