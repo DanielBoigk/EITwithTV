@@ -94,7 +94,6 @@ function assemble_K!(K::SparseMatrixCSC ,cellvalues::CellValues, dh::DofHandler,
             σ = function_value(cellvalues, q_point, γe)
             for i in 1:n_basefuncs
                 ∇v = shape_gradient(cellvalues, q_point, i)
-                #u = shape_value(cellvalues, q_point, i)
                 for j in 1:n_basefuncs
                     ∇u = shape_gradient(cellvalues, q_point, j)
                     Ke[i, j] += σ* (∇v ⋅ ∇u) * dΩ
@@ -108,6 +107,30 @@ end
 function assemble_K(cellvalues::CellValues, dh::DofHandler, γ::AbstractVector)
     K = allocate_matrix(dh)
     return assemble_K!(K, cellvalues, dh, γ)
+end
+
+# This is the stiffness matrix we need for Tikhonov Regularization:
+function assemble_K(cellvalues::CellValues, dh::DofHandler)
+    K = allocate_matrix(dh)
+    n_basefuncs = getnbasefunctions(cellvalues)
+    Ke = zeros(n_basefuncs, n_basefuncs)
+    assembler = start_assemble(K)
+    for cell in CellIterator(dh)
+        fill!(Ke, 0)
+        reinit!(cellvalues, cell)
+        for q_point in 1:getnquadpoints(cellvalues)
+            dΩ = getdetJdV(cellvalues, q_point)
+            for i in 1:n_basefuncs
+                ∇v = shape_gradient(cellvalues, q_point, i)
+                for j in 1:n_basefuncs
+                    ∇u = shape_gradient(cellvalues, q_point, j)
+                    Ke[i, j] += (∇v ⋅ ∇u) * dΩ
+                end
+            end
+        end
+        assemble!(assembler, celldofs(cell), Ke)
+    end
+    return K, cholesky(K)
 end
 
 # This assembles ∫(g*v)d∂Ω
