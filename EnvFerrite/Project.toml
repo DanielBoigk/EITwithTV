@@ -1,4 +1,5 @@
 [deps]
+Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
 Ferrite = "c061ca5d-56c9-439f-9c0e-210fe06d3992"
 Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
 IterativeSolvers = "42fd0dbc-a981-5370-80f2-aaf504508153"
