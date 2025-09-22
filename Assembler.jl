@@ -175,7 +175,7 @@ function calculate_bilinear_map_rhs(rhs::AbstractVector,a::AbstractVector,b::Abs
                 end
             end
         end
-        assemble! (rhs, dofs, re)
+        assemble!(rhs, dofs, re)
     end
 
 
