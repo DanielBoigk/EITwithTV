@@ -115,11 +115,38 @@ function assemble_K(cellvalues::CellValues, dh::DofHandler, γ, ϵ = 0.0)
     return K
 end
 
+function assemble_K(cellvalues::CellValues, dh::DofHandler, γ, ϵ = 0.0)
+    K = allocate_matrix(dh)
+    n_basefuncs = getnbasefunctions(cellvalues)
+    Ke = zeros(n_basefuncs, n_basefuncs)
+    assembler = start_assemble(K)
+    for cell in CellIterator(dh)
+        fill!(Ke, 0)
+        reinit!(cellvalues, cell)
+        for q in 1:getnquadpoints(cellvalues)
+            dΩ = getdetJdV(cellvalues, q)
+            x = spatial_coordinate(cellvalues, q, getcoordinates(cell))
+            σ = γ(x)
+            for i in 1:n_basefuncs
+                ∇v = shape_gradient(cellvalues, q, i)
+                for j in 1:n_basefuncs
+                    ∇u = shape_gradient(cellvalues, q, j)
+                    Ke[i, j] += σ * (∇v ⋅ ∇u) * dΩ
+                end
+            end
+        end
+        assemble!(assembler, celldofs(cell), Ke)
+    end
+    if ϵ ≠ 0.0
+        K += ϵ * I
+    end
+    return K
+end
 
 
 # This function assembles the stiffness matrix from a given vector.
 # This is: ∫(γ * ∇(u)⋅∇(v))dΩ 
-function assemble_K(cellvalues::CellValues, dh::DofHandler, γ::AbstractVector,ϵ=0.0)
+function assemble_K(cellvalues::CellValues, dh::DofHandler, γ::AbstractVector,ϵ::Float64)
     K = allocate_matrix(dh)
     n_basefuncs = getnbasefunctions(cellvalues)
     Ke = zeros(n_basefuncs, n_basefuncs)
@@ -148,7 +175,31 @@ function assemble_K(cellvalues::CellValues, dh::DofHandler, γ::AbstractVector,�
     return K
 end
 
-
+function assemble_K(cellvalues::CellValues, dh::DofHandler, γ::AbstractVector)
+    K = allocate_matrix(dh)
+    n_basefuncs = getnbasefunctions(cellvalues)
+    Ke = zeros(n_basefuncs, n_basefuncs)
+    assembler = start_assemble(K)
+    for cell in CellIterator(dh)
+        fill!(Ke, 0)
+        reinit!(cellvalues, cell)
+        for q_point in 1:getnquadpoints(cellvalues)
+            dΩ = getdetJdV(cellvalues, q_point)
+            γe = γ[celldofs(cell)] # (Edit) Could be done more efficiently by copying into preallocated array
+            σ = function_value(cellvalues, q_point, γe)
+            for i in 1:n_basefuncs
+                ∇v = shape_gradient(cellvalues, q_point, i)
+                #u = shape_value(cellvalues, q_point, i)
+                for j in 1:n_basefuncs
+                    ∇u = shape_gradient(cellvalues, q_point, j)
+                    Ke[i, j] += σ* (∇v ⋅ ∇u) * dΩ
+                end
+            end
+        end
+        assemble!(assembler, celldofs(cell), Ke)
+    end
+    return K
+end
 
 
 function assemble_function_vector(cellvalues::CellValues, dh::DofHandler, f, M_cholesky)
@@ -316,7 +367,7 @@ function TV(n::Int64)
     TV(zeros(n), zeros(n), zeros(n), 0.0, 0.0, 0.0)
 end
 # This is the function which has a differentiable FEM version of the Total Variation Error and Gradient:
-function calc_tv_gradient(σ::AbstractVector,tv::TV, cellvalues::CellValues, dh::DofHandler, M, ε::Float64 = 1e-8)
+function calc_tv_gradient!(σ::AbstractVector,tv::TV, cellvalues::CellValues, dh::DofHandler, M, ε::Float64 = 1e-8)
     n = ndofs(dh)
     rhs = tv.rhs
     
