@@ -327,7 +327,7 @@ function state_adjoint_step_cg!(mode::EITMode, K::AbstractMatrix, M, d,∂d ,dow
     cg!(mode.λ, K, up(∂d(b,mode.f)); maxiter = maxiter)
     mode.error = d(b,mode.f)
     # Calculate ∇(uᵢ)⋅∇(λᵢ) here: 
-    mode.δσ = - calculate_bilinear_map(mode.λ, mode.u, cellvalues, dh, M)    
+    mode.δσ = calculate_bilinear_map(mode.λ, mode.u, cellvalues, dh, M)    
     # Check whether this needs + or - as a sign.
 end
 # Use this for toy problems:
@@ -346,7 +346,7 @@ function state_adjoint_step_fac!(mode::EITMode, K_factorized, M, d,∂d ,down,up
     # ∂ₓd is gradient of pseudo metric d(x,y)
     mode.error = d(b,mode.f) # Error according to pseudo metric d(x,y)
     # Calculate ∇(uᵢ)⋅∇(λᵢ) here: 
-    mode.δσ = - calculate_bilinear_map(mode.λ, mode.u, cellvalues, dh, M)    
+    mode.δσ = calculate_bilinear_map(mode.λ, mode.u, cellvalues, dh, M)    
     # Check whether this needs + or - as a sign.
 end
 
