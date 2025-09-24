@@ -327,7 +327,7 @@ function state_adjoint_step_cg!(mode::EITMode, K::AbstractMatrix, M, d,∂d ,dow
     cg!(mode.λ, K, up(∂d(b,mode.f)); maxiter = maxiter)
     mode.error = d(b,mode.f)
     # Calculate ∇(uᵢ)⋅∇(λᵢ) here: 
-    mode.δσ = calculate_bilinear_map(mode.λ, mode.u, cellvalues, dh, M)    
+    mode.δσ = - calculate_bilinear_map(mode.λ, mode.u, cellvalues, dh, M)    
     # Check whether this needs + or - as a sign.
 end
 # Use this for toy problems:
@@ -346,7 +346,7 @@ function state_adjoint_step_fac!(mode::EITMode, K_factorized, M, d,∂d ,down,up
     # ∂ₓd is gradient of pseudo metric d(x,y)
     mode.error = d(b,mode.f) # Error according to pseudo metric d(x,y)
     # Calculate ∇(uᵢ)⋅∇(λᵢ) here: 
-    mode.δσ = calculate_bilinear_map(mode.λ, mode.u, cellvalues, dh, M)    
+    mode.δσ = - calculate_bilinear_map(mode.λ, mode.u, cellvalues, dh, M)    
     # Check whether this needs + or - as a sign.
 end
 
@@ -487,12 +487,12 @@ end
 function GaussNewtonState(n::Int64,k::Int64) # Just some default constructor
     J = zeros(k,n)
     r = zeros(k)
-    δ = n
-    M = LinearMap(I(n))
+    δ = zeros(n)
+    M = LinearMap(spdiagm(ones(n)))
     GaussNewtonState(J,r,δ,M)
 end
 
-function gauss_newton_cg!(gns::GaussNewtonState, α::Float64 = 1.0, maxiter = 500)
+function gauss_newton_cg!(gns::GaussNewtonState, α::Float64 = 1e-3, maxiter = 500)
     J = gns.J
     r = gns.r
     M = gns.M
@@ -516,7 +516,7 @@ function gauss_newton_svd(J::Matrix{Float64}, r::Vector{Float64}; λ::Float64=1e
     end
     V * (Σ_damped .* (U' * r))
 end
-function gauss_newton_svd!(gns::GaussNewtonState; λ::Float64=1e-3)
+function gauss_newton_svd!(gns::GaussNewtonState, λ::Float64=1e-3)
     J = gns.J
     r = gns.r
     U, Σ, V = svd(J, full=false)
